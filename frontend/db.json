@@ -1,0 +1,24 @@
+{
+  "persons": [
+    {
+      "name": "Dan Abramov",
+      "number": "12-43-234345",
+      "id": 3
+    },
+    {
+      "name": "Mary Poppendieck",
+      "number": "39-23-6423122",
+      "id": 4
+    },
+    {
+      "name": "asd",
+      "number": "1111111111111",
+      "id": 5
+    },
+    {
+      "name": "Uusi 2024",
+      "number": "0123",
+      "id": 6
+    }
+  ]
+}
