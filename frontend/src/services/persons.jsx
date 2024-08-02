@@ -1,8 +1,8 @@
 import axios from 'axios'
 
-const url = 'http://localhost:3001/api/persons'
+// const url = 'http://localhost:3001/api/persons'
 // const url = 'https://puhelinluettelojussi2.fly.dev/api/persons'
-// const url = '/api/persons'
+const url = '/api/persons'
 
 const getAll = () => {
   console.log("getting from " + url)
