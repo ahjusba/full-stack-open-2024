@@ -53,6 +53,11 @@ if(process.argv.length === 3) {
   printPeopleCollection()
 }
 
+if(process.argv.length !== 3 && process.argv.length !== 5) {
+  console.log("Too few or many arguments")
+  mongoose.connection.close()
+}
+
 
 
 
