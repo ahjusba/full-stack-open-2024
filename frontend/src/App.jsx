@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import personsService from './services/persons'
+import './index.css'
 
 const App = () => {
   const [persons, setPersons] = useState([]) 
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+  const [errorMessage, setErrorMessage] = useState('')
 
   useEffect(() => {
     console.log("Persons ", persons)
@@ -23,6 +25,7 @@ const App = () => {
   const filteredPersons = persons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase()))
 
   const addPerson = event => {
+    setErrorMessage('')
     event.preventDefault()
 
     if (persons.filter(person => person.name === newName).length > 0) {
@@ -44,6 +47,10 @@ const App = () => {
       .add(personObject)
       .then(newPerson => {
         setPersons(persons.concat(newPerson))
+      })
+      .catch(error => {
+        console.log("error: " + error.response.data.error)
+        setErrorMessage(error.response.data.error)
       })
 
     setNewName('')
@@ -70,6 +77,10 @@ const App = () => {
     personsService
       .update(id, updatedPerson)
       .then(response => setPersons(persons.map(person => person.id !== id ? person : response)))
+      .catch(error => {
+        console.log("error: " + error.response.data.error)
+        setErrorMessage(error.response.data.error)
+      })
   }
 
   const handleNameChange = event => {
@@ -82,10 +93,12 @@ const App = () => {
 
   const handleFilterChange = event => {
     setFilter(event.target.value)
+    setErrorMessage('')
   }
 
   return (
     <div>
+      {errorMessage && <ErrorMessage text={errorMessage} />}
       <Header text='Phonebook' />
       <InputField fieldName='Filter contacts: ' value={filter} handleValueChange={handleFilterChange} />
       <Header text='Add New Contact' />
@@ -121,6 +134,14 @@ const Header = ({text}) => {
     <h1>
       {text}
     </h1>
+  )
+}
+
+const ErrorMessage = ({text}) => {
+  return (
+      <h1 className="error">
+        {text}
+      </h1>
   )
 }
 

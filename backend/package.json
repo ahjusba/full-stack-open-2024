@@ -10,7 +10,8 @@
     "build:ui": "@powershell if(Test-Path dist) { Remove-Item -Recurse -Force dist } && cd ../frontend && npm run build && @powershell Copy-Item dist -Recurse ../backend",
     "deploy": "fly deploy",
     "deploy:full": "npm run build:ui && npm run deploy",
-    "logs:prod": "fly logs"
+    "logs:prod": "fly logs",
+    "lint": "eslint ."
   },
   "author": "Jussi R",
   "license": "ISC",
@@ -22,7 +23,12 @@
     "morgan": "^1.10.0"
   },
   "devDependencies": {
+    "@eslint/js": "^9.9.0",
     "@flydotio/dockerfile": "^0.5.7",
+    "@stylistic/eslint-plugin-js": "^2.6.2",
+    "eslint": "^9.9.0",
+    "eslint-plugin-react": "^7.35.0",
+    "globals": "^15.9.0",
     "nodemon": "^3.1.2"
   }
 }

@@ -28,7 +28,7 @@ const createNewPersonEntry = () => {
     name: name,
     number: number,
   })
-  person.save().then(result => {
+  person.save().then(() => {
     console.log(`Saved person ${name} with number ${number} to MongoDb`)
     mongoose.connection.close()
   })
@@ -43,18 +43,18 @@ const printPeopleCollection = () => {
   })
 }
 
-//Command line contain five arguments, eg. "$node mongo.js yourpassword Anna 040-1234556" 
+//Command line contain five arguments, eg. "$node mongo.js yourpassword Anna 040-1234556"
 if(process.argv.length === 5) {
   createNewPersonEntry()
 }
 
-//Command line contain five arguments, eg. "$node mongo.js yourpassword" 
+//Command line contain five arguments, eg. "$node mongo.js yourpassword"
 if(process.argv.length === 3) {
   printPeopleCollection()
 }
 
 if(process.argv.length !== 3 && process.argv.length !== 5) {
-  console.log("Too few or many arguments")
+  console.log('Too few or many arguments')
   mongoose.connection.close()
 }
 

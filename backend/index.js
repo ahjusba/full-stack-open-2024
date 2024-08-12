@@ -11,7 +11,7 @@ app.use(morgan(':method :url :status :res[content-length] - :response-time ms :p
 app.use(express.static('dist'))
 
 //POST url status responsetime person
-morgan.token('person', function (req, res) { return JSON.stringify(req.body) })
+morgan.token('person', function (req) { return JSON.stringify(req.body) })
 
 app.get('/api/persons', (request, response) => {
   Person.find({}).then(people => {
@@ -20,13 +20,13 @@ app.get('/api/persons', (request, response) => {
 })
 
 app.get('/api/persons/:id', (request, response, next) => {
-  const person = Person.findById(request.params.id).then(person => {
+  Person.findById(request.params.id).then(person => {
     if(!person) {
       return response.status(404).end()
-    } 
+    }
     response.json(person)
   })
-  .catch(error =>  next(error))
+    .catch(error =>  next(error))
 })
 
 app.delete('/api/persons/:id', (request, response, next) => {
@@ -44,20 +44,20 @@ app.delete('/api/persons/:id', (request, response, next) => {
 })
 
 app.put('/api/persons/:id', (request, response, next) => {
-  const body = request.body
-  const person = {
-    name: body.name,
-    number: body.number,
-  }
+  const { name, number } = request.body
 
-  Person.findByIdAndUpdate(request.params.id, person, { new: true })
+  Person.findByIdAndUpdate(
+    request.params.id,
+    { name, number },
+    { new: true, runValidators: true, context: 'query' }
+  )
     .then(updatedPerson => {
       response.json(updatedPerson)
     })
     .catch(error => next(error))
 })
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
   const body = request.body
   if(!body.name) {
     return response.status(400).json({
@@ -77,14 +77,16 @@ app.post('/api/persons', (request, response) => {
     })
   }
 
-  const person = new Person({    
+  const person = new Person({
     name: body.name,
     number: body.number
   })
 
-  person.save().then(savedPerson => {
-    response.json(savedPerson)
-  })
+  person.save()
+    .then(savedPerson => {
+      response.json(savedPerson)
+    })
+    .catch(error => next(error))
 })
 
 const nameAlreadyExists = (name) => {
@@ -111,41 +113,42 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
 
- const getCustomTimestamp = () => {
-  const now = new Date();
+const getCustomTimestamp = () => {
+  const now = new Date()
 
   // Format the date part
-  const day = now.toLocaleDateString('en-US', { weekday: 'short' });
-  const month = now.toLocaleDateString('en-US', { month: 'short' });
-  const date = now.getDate();
-  const year = now.getFullYear();
+  const day = now.toLocaleDateString('en-US', { weekday: 'short' })
+  const month = now.toLocaleDateString('en-US', { month: 'short' })
+  const date = now.getDate()
+  const year = now.getFullYear()
 
   // Format the time part
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const seconds = String(now.getSeconds()).padStart(2, '0');
-  const time = `${hours}:${minutes}:${seconds}`;
+  const hours = String(now.getHours()).padStart(2, '0')
+  const minutes = String(now.getMinutes()).padStart(2, '0')
+  const seconds = String(now.getSeconds()).padStart(2, '0')
 
   // Get the GMT offset
-  const timezoneOffset = -now.getTimezoneOffset();
-  const offsetHours = String(Math.floor(Math.abs(timezoneOffset) / 60)).padStart(2, '0');
-  const offsetMinutes = String(Math.abs(timezoneOffset) % 60).padStart(2, '0');
-  const gmtOffset = `GMT${timezoneOffset >= 0 ? '+' : '-'}${offsetHours}${offsetMinutes}`;
+  const timezoneOffset = -now.getTimezoneOffset()
+  const offsetHours = String(Math.floor(Math.abs(timezoneOffset) / 60)).padStart(2, '0')
+  const offsetMinutes = String(Math.abs(timezoneOffset) % 60).padStart(2, '0')
+  const gmtOffset = `GMT${timezoneOffset >= 0 ? '+' : '-'}${offsetHours}${offsetMinutes}`
 
   // Get the time zone name
-  const timeZoneName = now.toLocaleTimeString('en-US', { timeZoneName: 'long' }).split(' ').slice(2).join(' ');
+  const timeZoneName = now.toLocaleTimeString('en-US', { timeZoneName: 'long' }).split(' ').slice(2).join(' ')
 
   // Combine all parts
-  return `${day} ${month} ${date} ${year} ${hours}.${minutes}:${seconds} ${gmtOffset} (${timeZoneName})`;
+  return `${day} ${month} ${date} ${year} ${hours}.${minutes}:${seconds} ${gmtOffset} (${timeZoneName})`
 }
 
 const errorHandler = (error, request, response, next) => {
   console.error(error.message)
-  console.log("Error name: " + error.name)
+  console.log('Error name: ' + error.name)
 
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
-  } 
+  } else if (error.name === 'ValidationError') {
+    return response.status(400).json({ error: error.message })
+  }
 
   next(error)
 }
