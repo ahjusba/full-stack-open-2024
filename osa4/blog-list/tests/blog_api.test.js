@@ -1,24 +1,33 @@
-const { test, after, beforeEach, describe } = require('node:test')
+const { test, after, beforeEach, describe, before } = require('node:test')
 const assert = require('node:assert')
 const mongoose = require('mongoose')
 const supertest = require('supertest')
 const app = require('../app')
 const Blog = require('../models/blog')
+const User = require('../models/user')
+const bcrypt = require('bcrypt')
 const helper = require('./test_helper')
 const api = supertest(app)
 
 describe('When there is initially some blogs saved', () => {
+  let user = null
+  before(async () => {
+    await User.deleteMany({})
+    const passwordHash = await bcrypt.hash('sekret', 10)
+    const userToBeSaved = new User({ name: 'James Bond', username: 'Double-o-seven', passwordHash })
+    user = await userToBeSaved.save()
+  })
 
-  beforeEach(async () => {
+  beforeEach(async () => {       
     await Blog.deleteMany({})
     const blogObjects = helper.initialBlogs
-      .map(blog => new Blog(blog))
+      .map(blog => new Blog({ ...blog, user: user._id }))
     const promiseArray = blogObjects.map(blog => {
       return blog.save()
     })
     await Promise.all(promiseArray)
   })
-  
+
   test('blogs are returned as json', async () => {
     await api
       .get('/api/blogs')
@@ -38,6 +47,52 @@ describe('When there is initially some blogs saved', () => {
     const titles = response.body.map(e => e.title)
     assert(titles.includes('Go To Statement Considered Harmful'))
   })
+
+  test('a blog without userID cant be added ', async () => {
+    const faultyId = user.id + "a"
+    const newBlog = 
+    {
+      _id: "5a422a851b54a676234d1799",
+      title: "async/await simplifies making async calls",
+      author: "Michael Chan",
+      url: "https://reactpatterns.com/",
+      likes: 9,
+      userId: faultyId
+    }  
+  
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(400)
+    
+    const blogsAtEnd = await helper.blogsInDb()
+    const titles = blogsAtEnd.map(r => r.title)
+    assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length)
+    assert(!titles.includes("async/await simplifies making async calls"))
+  
+  })
+
+  test('a blog with a falty userId wont be added ', async () => {
+    const newBlog = 
+    {
+      _id: "5a422a851b54a676234d1799",
+      title: "async/await simplifies making async calls",
+      author: "Michael Chan",
+      url: "https://reactpatterns.com/",
+      likes: 9,
+    }  
+  
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(400)
+    
+    const blogsAtEnd = await helper.blogsInDb()
+    const titles = blogsAtEnd.map(r => r.title)
+    assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length)
+    assert(!titles.includes("async/await simplifies making async calls"))
+  
+  })
   
   test('a valid blog can be added ', async () => {
     const newBlog = 
@@ -47,6 +102,7 @@ describe('When there is initially some blogs saved', () => {
       author: "Michael Chan",
       url: "https://reactpatterns.com/",
       likes: 9,
+      userId: user.id,
     }  
   
     await api
@@ -66,6 +122,7 @@ describe('When there is initially some blogs saved', () => {
     const newBlog = {
       likes: 19,
       url: "https://reactpatterns.com/",
+      userId: user.id
     }
   
     await api
@@ -83,6 +140,7 @@ describe('When there is initially some blogs saved', () => {
       title: "This is new blog",
       likes: 66,
       url: "https://reactpatterns.com/",
+      userId: user.id
     }
   
     const response = await api
@@ -98,6 +156,7 @@ describe('When there is initially some blogs saved', () => {
     const newBlog = {
       title: "This is new blog",
       url: "https://reactpatterns.com/",
+      userId: user.id
     }
   
     const response = await api
@@ -112,6 +171,7 @@ describe('When there is initially some blogs saved', () => {
   test('objects without URL field wont be added', async () => {
     const newBlog = {
       title: "This is new blog",
+      userId: user.id
     }
   
     const response = await api
@@ -132,7 +192,7 @@ describe('When there is initially some blogs saved', () => {
         .get(`/api/blogs/${blogToView.id}`)
         .expect(200)   
         .expect('Content-Type', /application\/json/)
-      
+      delete resultBlog.body.user
       assert.deepStrictEqual(resultBlog.body, blogToView)
     })
 
@@ -206,9 +266,6 @@ describe('When there is initially some blogs saved', () => {
     })
   })
 })
-
-
-
 
 after(async () => {
   await mongoose.connection.close()

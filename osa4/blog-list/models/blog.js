@@ -14,8 +14,12 @@ const blogSchema = new mongoose.Schema({
   url: {
     type: String,
     required: true
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
   }
-})
+}, { strict: false })
 
 blogSchema.set('toJSON', {
   transform: (document, returnedObject) => {
