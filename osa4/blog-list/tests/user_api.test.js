@@ -12,6 +12,8 @@ describe('when there is initially one user in db', () => {
 
   beforeEach(async () => {
     await User.deleteMany({})
+    const usersAtStart = await helper.usersInDb()
+    console.log("Users in database: ", usersAtStart.length)
     const passwordHash = await bcrypt.hash('sekret', 10)
     const user = new User({ username: 'Bond', passwordHash })
     await user.save()

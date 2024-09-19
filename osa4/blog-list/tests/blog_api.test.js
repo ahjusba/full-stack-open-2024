@@ -25,7 +25,15 @@ describe('When there is initially some blogs saved', () => {
     const promiseArray = blogObjects.map(blog => {
       return blog.save()
     })
+
+    let blogsArray = []
+    blogObjects.map(blog => {
+      blogsArray = blogsArray.concat(blog.id)
+    })
+
     await Promise.all(promiseArray)
+    user.blogs = blogsArray
+    await user.save()
   })
 
   test('blogs are returned as json', async () => {
