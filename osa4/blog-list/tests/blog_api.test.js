@@ -11,12 +11,17 @@ const api = supertest(app)
 
 describe('When there is initially some blogs saved', () => {
   let user = null
-  beforeEach(async () => {       
+  let token = null
+  before(async () => {
     await User.deleteMany({})
     const passwordHash = await bcrypt.hash('sekret', 10)
     const userToBeSaved = new User({ name: 'James Bond', username: 'Double-o-seven', passwordHash })
     await userToBeSaved.save()
     user = await helper.getAnyUserModel()
+    token = await helper.loginUser({ username: 'Double-o-seven', password: 'sekret' })
+  })
+  
+  beforeEach(async () => {   
     await Blog.deleteMany({})
     const blogObjects = helper.initialBlogs
       .map(blog => new Blog({ ...blog, user: user.id }))
@@ -54,8 +59,7 @@ describe('When there is initially some blogs saved', () => {
     assert(titles.includes('Go To Statement Considered Harmful'))
   })
 
-  test('a blog without userID cant be added ', async () => {
-    const faultyId = user.id + "a"
+  test('blog cant be added without auth token', async () => {
     const newBlog = 
     {
       _id: "5a422a851b54a676234d1799",
@@ -63,22 +67,17 @@ describe('When there is initially some blogs saved', () => {
       author: "Michael Chan",
       url: "https://reactpatterns.com/",
       likes: 9,
-      userId: faultyId
+      userId: user.id,
     }  
   
     await api
       .post('/api/blogs')
       .send(newBlog)
-      .expect(400)
-    
-    const blogsAtEnd = await helper.blogsInDb()
-    const titles = blogsAtEnd.map(r => r.title)
-    assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length)
-    assert(!titles.includes("async/await simplifies making async calls"))
-  
+      .expect(401)
+      .expect('Content-Type', /application\/json/)
   })
 
-  test('a blog with a falty userId wont be added ', async () => {
+  test('blog cant be added with a faulty auth token', async () => {
     const newBlog = 
     {
       _id: "5a422a851b54a676234d1799",
@@ -86,19 +85,65 @@ describe('When there is initially some blogs saved', () => {
       author: "Michael Chan",
       url: "https://reactpatterns.com/",
       likes: 9,
+      userId: user.id,
     }  
   
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token+"asd"}`)
       .send(newBlog)
-      .expect(400)
-    
-    const blogsAtEnd = await helper.blogsInDb()
-    const titles = blogsAtEnd.map(r => r.title)
-    assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length)
-    assert(!titles.includes("async/await simplifies making async calls"))
-  
+      .expect(401)
+      .expect('Content-Type', /application\/json/)
   })
+
+  // test('a blog with a falty userId wont be added', async () => {
+  //   const faultyId = user.id + "a"
+  //   const newBlog = 
+  //   {
+  //     _id: "5a422a851b54a676234d1799",
+  //     title: "async/await simplifies making async calls",
+  //     author: "Michael Chan",
+  //     url: "https://reactpatterns.com/",
+  //     likes: 9,
+  //     userId: faultyId
+  //   }  
+  
+  //   await api
+  //     .post('/api/blogs')
+  //     .set('Authorization', `Bearer ${token}`)
+  //     .send(newBlog)
+  //     .expect(400)
+    
+  //   const blogsAtEnd = await helper.blogsInDb()
+  //   const titles = blogsAtEnd.map(r => r.title)
+  //   assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length)
+  //   assert(!titles.includes("async/await simplifies making async calls"))
+  
+  // })
+
+  // test('a blog without userID cant be added', async () => {
+  //    const faultyId = user.id + "a"
+  //   const newBlog = 
+  //   {
+  //     _id: "5a422a851b54a676234d1799",
+  //     title: "async/await simplifies making async calls",
+  //     author: "Michael Chan",
+  //     url: "https://reactpatterns.com/",
+  //     likes: 9,
+  //   }  
+  
+  //   await api
+  //     .post('/api/blogs')
+  //     .set('Authorization', `Bearer ${token}`)
+  //     .send(newBlog)
+  //     .expect(400)
+    
+  //   const blogsAtEnd = await helper.blogsInDb()
+  //   const titles = blogsAtEnd.map(r => r.title)
+  //   assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length)
+  //   assert(!titles.includes("async/await simplifies making async calls"))
+  
+  // })
   
   test('a valid blog can be added ', async () => {
     const newBlog = 
@@ -113,6 +158,7 @@ describe('When there is initially some blogs saved', () => {
   
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -133,6 +179,7 @@ describe('When there is initially some blogs saved', () => {
   
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(400)
   
@@ -151,6 +198,7 @@ describe('When there is initially some blogs saved', () => {
   
     const response = await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -167,6 +215,7 @@ describe('When there is initially some blogs saved', () => {
   
     const response = await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -182,6 +231,7 @@ describe('When there is initially some blogs saved', () => {
   
     const response = await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(400)
   
