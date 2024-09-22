@@ -62,6 +62,11 @@ const getAnyUser = async () => {
   return usersJson[0]
 }
 
+const getAnyUserModel = async () => {
+  const user = await User.findOne()
+  return user
+}
+
 const nonExistingId = async () => {
   const blog = new Blog({ 
     title: 'willremovethissoon',
@@ -84,5 +89,5 @@ const usersInDb = async () => {
 }
 
 module.exports = {
-  initialBlogs, nonExistingId, blogsInDb, usersInDb, getAnyUser
+  initialBlogs, nonExistingId, blogsInDb, usersInDb, getAnyUser, getAnyUserModel
 }

@@ -11,17 +11,15 @@ const api = supertest(app)
 
 describe('When there is initially some blogs saved', () => {
   let user = null
-  before(async () => {
+  beforeEach(async () => {       
     await User.deleteMany({})
     const passwordHash = await bcrypt.hash('sekret', 10)
     const userToBeSaved = new User({ name: 'James Bond', username: 'Double-o-seven', passwordHash })
-    user = await userToBeSaved.save()
-  })
-
-  beforeEach(async () => {       
+    await userToBeSaved.save()
+    user = await helper.getAnyUserModel()
     await Blog.deleteMany({})
     const blogObjects = helper.initialBlogs
-      .map(blog => new Blog({ ...blog, user: user._id }))
+      .map(blog => new Blog({ ...blog, user: user.id }))
     const promiseArray = blogObjects.map(blog => {
       return blog.save()
     })
@@ -276,5 +274,6 @@ describe('When there is initially some blogs saved', () => {
 })
 
 after(async () => {
+  await User.deleteMany({})
   await mongoose.connection.close()
 })

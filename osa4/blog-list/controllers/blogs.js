@@ -20,10 +20,8 @@ blogsRouter.post('/', async (request, response) => {
   }
 
   const blog = new Blog({ ...body, user: user.id }) //Blog gets the user's ID
-  console.log(`Blog ID before saving: `, blog._id)
   const savedBlog = await blog.save()
   user.blogs = user.blogs.concat(savedBlog.id) //And user also gets the blog's ID
-  console.log(`Saving blog ${savedBlog.id} to user ${user.id}`)
   await user.save()
   response.status(201).json(savedBlog)      
 })
