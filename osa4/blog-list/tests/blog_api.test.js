@@ -273,6 +273,7 @@ describe('When there is initially some blogs saved', () => {
       const deleteId = blogToDelete._id
       await api
         .delete(`/api/blogs/${deleteId}`)
+        .set('Authorization', `Bearer ${token}`)
         .expect(204)
       
       const blogsAtEnd = await helper.blogsInDb()
@@ -325,5 +326,6 @@ describe('When there is initially some blogs saved', () => {
 
 after(async () => {
   await User.deleteMany({})
+  await Blog.deleteMany({})
   await mongoose.connection.close()
 })
