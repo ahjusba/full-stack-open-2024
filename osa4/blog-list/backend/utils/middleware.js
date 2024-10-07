@@ -40,7 +40,6 @@ const tokenExtractor = (request, response, next) => {
 const userExtractor = async (request, response, next) => {
 
   if(!request.token) {
-    console.log("Token missing");
     next()
     return
   }
