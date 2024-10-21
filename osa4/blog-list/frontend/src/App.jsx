@@ -10,6 +10,7 @@ const App = () => {
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
   const [errorMessage, setErrorMessage] = useState('')
+  const [message, setMessage] = useState('')
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedUser')
@@ -76,20 +77,24 @@ const App = () => {
     console.log("Posting: ", newBlog)
     try {
       await blogService.post(newBlog)
+      setMessage(`Added new blog: ${title}`)
+      setTimeout(() => {
+        setMessage(null)
+      }, 2000)
       updateBlogList()
     } catch (exception) {
       console.log("failed to post blog")
       setErrorMessage('Failed to post blog')
       setTimeout(() => {
-        setErrorMessage(null),
-        5000
-      })
+        setErrorMessage(null)        
+      }, 2000)
     }
   }
 
   return (
     <div>
       { errorMessage ?? <ErrorMessage message={errorMessage} />}
+      { message ?? <Message message={message} />}
       { user ? 
       <>
         <Blogs blogs={blogs} user={user} handleLogout={handleLogout}/>        
@@ -108,6 +113,12 @@ const App = () => {
 }
 
 const ErrorMessage = ({ message }) => {
+  return(
+    <p>{message}</p>
+  )
+}
+
+const Message = ({ message }) => {
   return(
     <p>{message}</p>
   )
