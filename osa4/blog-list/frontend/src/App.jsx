@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import Blog from './components/Blog'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import NewBlog from './components/NewBlog'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
@@ -18,10 +19,22 @@ const App = () => {
       blogService.setToken(user.token)
     } 
 
-    blogService.getAll().then(blogs =>
-      setBlogs( blogs )
-    )  
+    updateBlogList()
   }, [])
+
+  const updateBlogList = async () => {
+    try {
+      const blogs = await blogService.getAll()
+      setBlogs(blogs)
+
+    } catch (exception) {
+      console.log("Couldn't fetch bloglist")
+      setErrorMessage("Couldn't fetch bloglist")
+      setTimeout(() => {
+        setErrorMessage(null)
+      }, 5000)
+    }
+  }
 
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -54,18 +67,41 @@ const App = () => {
     setPassword('')
   }
 
+  const postNewBlog = async (title, author, url) => {
+    const newBlog = {
+      title,
+      author,
+      url
+    }
+    console.log("Posting: ", newBlog)
+    try {
+      await blogService.post(newBlog)
+      updateBlogList()
+    } catch (exception) {
+      console.log("failed to post blog")
+      setErrorMessage('Failed to post blog')
+      setTimeout(() => {
+        setErrorMessage(null),
+        5000
+      })
+    }
+  }
+
   return (
     <div>
       { errorMessage ?? <ErrorMessage message={errorMessage} />}
       { user ? 
-      <Blogs blogs={blogs} user={user} handleLogout={handleLogout}/> :
-      <LoginForm
-        handleLogin={handleLogin}
-        setUsername={setUsername}
-        setPassword={setPassword}
-        username={username}
-        password={password}
-      />
+      <>
+        <Blogs blogs={blogs} user={user} handleLogout={handleLogout}/>        
+        <NewBlog postNewBlog={postNewBlog}/> 
+      </> :
+        <LoginForm
+          handleLogin={handleLogin}
+          setUsername={setUsername}
+          setPassword={setPassword}
+          username={username}
+          password={password}
+        />
       }      
     </div>
   )
