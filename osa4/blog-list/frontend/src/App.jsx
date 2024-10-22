@@ -30,13 +30,23 @@ const App = () => {
     try {
       const blogs = await blogService.getAll()
       setBlogs(blogs)
-
+      updateBlogList()
     } catch (exception) {
       console.log("Couldn't fetch bloglist")
       setErrorMessage("Couldn't fetch bloglist")
       setTimeout(() => {
         setErrorMessage(null)
       }, 5000)
+    }
+  }
+
+  const likeBlog = async (updatedBlog) => {
+    console.log("Like blog")
+    try {
+      const blog = await blogService.putLike(updatedBlog)
+      console.log("Updated blog: ", blog)
+    } catch (exception) {
+      console.log(exception)
     }
   }
 
@@ -101,7 +111,7 @@ const App = () => {
       { message ?? <Message message={message} />}
       { user ? 
       <>
-        <Blogs blogs={blogs} user={user} handleLogout={handleLogout}/>        
+        <Blogs blogs={blogs} user={user} handleLogout={handleLogout} likeBlog={likeBlog}/>        
         <Toggleable buttonLabel={"add new note"} ref={blogFormRef}>
           <NewBlog postNewBlog={postNewBlog}/> 
         </Toggleable>
@@ -130,13 +140,13 @@ const Message = ({ message }) => {
   )
 }
 
-const Blogs = ({ blogs, user, handleLogout }) => {
+const Blogs = ({ blogs, user, handleLogout, likeBlog }) => {
   return(
     <div>
       <h2>Logged in as {user.name}</h2>
       <button onClick={handleLogout}>logout</button>
       {blogs.map(blog =>
-        <Blog key={blog.id} blog={blog} />
+        <Blog key={blog.id} blog={blog} likeBlog={likeBlog}/>
       )}
     </div>
   )
