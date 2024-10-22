@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Blog from './components/Blog'
+import Toggleable from './components/Toggleable'
 import blogService from './services/blogs'
 import loginService from './services/login'
 import NewBlog from './components/NewBlog'
@@ -11,6 +12,8 @@ const App = () => {
   const [user, setUser] = useState(null)
   const [errorMessage, setErrorMessage] = useState('')
   const [message, setMessage] = useState('')
+
+  const blogFormRef = useRef()
 
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedUser')
@@ -78,12 +81,13 @@ const App = () => {
     try {
       await blogService.post(newBlog)
       setMessage(`Added new blog: ${title}`)
+      blogFormRef.current.toggleVisibility()
       setTimeout(() => {
         setMessage(null)
       }, 2000)
       updateBlogList()
     } catch (exception) {
-      console.log("failed to post blog")
+      console.log("failed to post blog", exception)
       setErrorMessage('Failed to post blog')
       setTimeout(() => {
         setErrorMessage(null)        
@@ -98,7 +102,9 @@ const App = () => {
       { user ? 
       <>
         <Blogs blogs={blogs} user={user} handleLogout={handleLogout}/>        
-        <NewBlog postNewBlog={postNewBlog}/> 
+        <Toggleable buttonLabel={"add new note"} ref={blogFormRef}>
+          <NewBlog postNewBlog={postNewBlog}/> 
+        </Toggleable>
       </> :
         <LoginForm
           handleLogin={handleLogin}
