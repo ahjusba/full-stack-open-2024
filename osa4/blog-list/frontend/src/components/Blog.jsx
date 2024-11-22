@@ -10,7 +10,7 @@ const Blog = ({ blog, likeBlog }) => {
       {blog.title} {" "}     
       <button onClick={() => setDetailsVisible(!detailsVisible)}>{buttonText}</button>
       {detailsVisible &&
-      <ul>
+      <ul className='toggleableContent'>
         <li>Author: {blog.author}</li>
         <li>Likes: {blog.likes} <button onClick={() => likeBlog(blog)}>like</button></li>
         <li>Url: {blog.url}</li>
