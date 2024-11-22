@@ -107,6 +107,7 @@ const App = () => {
 
   return (
     <div>
+      <Title text="Blogs" />
       { errorMessage ?? <ErrorMessage message={errorMessage} />}
       { message ?? <Message message={message} />}
       { user ? 
@@ -125,6 +126,12 @@ const App = () => {
         />
       }      
     </div>
+  )
+}
+
+const Title = ({text }) => {
+  return(
+    <h1>{text}</h1>
   )
 }
 
@@ -162,6 +169,7 @@ const LoginForm = ({ handleLogin, setUsername, setPassword, username, password }
           value={username}
           name="Username"
           onChange={({ target }) => setUsername(target.value)}
+          data-testid='username'
         />
       </div>
       <div>
@@ -171,6 +179,7 @@ const LoginForm = ({ handleLogin, setUsername, setPassword, username, password }
           value={password}
           name="Password"
           onChange={({ target }) => setPassword(target.value)}
+          data-testid='password'
         />
       </div>
       <button type="submit">login</button>

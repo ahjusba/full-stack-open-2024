@@ -22,6 +22,7 @@ const NewBlog = ({ postNewBlog }) => {
           value={title}
           placeholder="Title"
           onChange={(e) => setTitle(e.target.value)}
+          data-testid='title'
         />
       </div>
       <div>
@@ -30,6 +31,7 @@ const NewBlog = ({ postNewBlog }) => {
           value={author}
           placeholder="Author"
           onChange={(e) => setAuthor(e.target.value)}
+          data-testid='author'
         />
       </div>
       <div>
@@ -38,6 +40,7 @@ const NewBlog = ({ postNewBlog }) => {
           value={url}
           placeholder="URL"
           onChange={(e) => setUrl(e.target.value)}
+          data-testid='url'
         />
       </div>
       <button onClick={handleCreateBlog}>Create</button>
