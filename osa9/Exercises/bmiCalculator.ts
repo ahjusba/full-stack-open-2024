@@ -22,4 +22,29 @@ const calculateBmi = (height: number, weigth: number): string => {
     }
 }
 
-console.log("BMI: ", calculateBmi(180, 74))
+const parseArguments = ( args: string[] ): { height: number, weight: number } => {
+    if (args.length < 4) throw new Error("There are too few arguments.")
+    if (args.length > 6) throw new Error("There are too many arguments.")
+    
+    const height = Number(args[2])
+    const weight = Number(args[3])
+
+    if((isNaN(height)) || isNaN(weight)) throw new Error("Input was not a number.")
+
+    return { height, weight }
+}
+
+if(require.main === module) {
+    try {
+    const { height, weight } = parseArguments(process.argv)
+    console.log("BMI: ", calculateBmi(height, weight))    
+    } catch (error: unknown) {
+        let errorMessage = "Failure occured. "
+        if (error instanceof Error) {
+            errorMessage += 'Error: ' + error.message
+        }
+        console.log(errorMessage)
+    }
+}
+
+export default calculateBmi
