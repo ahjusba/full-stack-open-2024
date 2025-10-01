@@ -1,0 +1,16 @@
+{
+  "name": "osa9",
+  "version": "1.0.0",
+  "description": "TypeScript exercises",
+  "main": "index.js",
+  "scripts": {
+    "test": "test",
+    "ts-node": "ts-node"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
