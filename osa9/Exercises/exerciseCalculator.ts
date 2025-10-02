@@ -24,7 +24,7 @@ const getRatingObject = (average: number, target: number): Rating => {
   }
 }
 
-const calculateExercise = ( target: number, dailyHours: number[] ): Result => {
+const calculateExercise = (target: number, dailyHours: number[]): Result => {
   if (dailyHours.length === 0) {
     throw new Error("dailyHours array cannot be empty")
   }
@@ -45,30 +45,30 @@ const calculateExercise = ( target: number, dailyHours: number[] ): Result => {
   }
 }
 
-const parseArguments = (args: string[]): { target: number, dailyHours: number[] } => {    
-    if (args.length < 4) throw new Error('Not enough arguments')        
+const parseArguments = (args: string[]): { target: number, dailyHours: number[] } => {
+  if (args.length < 4) throw new Error('Not enough arguments')
 
-    const numericArgs = args.slice(3)
-    if (numericArgs.some(arg => isNaN(Number(arg)))) {
-        throw new Error('Provided values were not numbers.')
-    }
+  const numericArgs = args.slice(3)
+  if (numericArgs.some(arg => isNaN(Number(arg)))) {
+    throw new Error('Provided values were not numbers.')
+  }
 
-    const target: number = Number(args[2])
-    const dailyHours: number[] = numericArgs.map(Number)
+  const target: number = Number(args[2])
+  const dailyHours: number[] = numericArgs.map(Number)
 
-    return { target, dailyHours }
+  return { target, dailyHours }
 }
 
 try {
-    const { target, dailyHours } = parseArguments(process.argv)
-    console.log(calculateExercise(target, dailyHours))
+  const { target, dailyHours } = parseArguments(process.argv)
+  console.log(calculateExercise(target, dailyHours))
 
 } catch (error: unknown) {
-    let errorMessage = "Failure occured. "
-    if (error instanceof Error) {
-        errorMessage += 'Error: ' + error.message
-    }
-    console.log(errorMessage)
+  let errorMessage = "Failure occured. "
+  if (error instanceof Error) {
+    errorMessage += 'Error: ' + error.message
+  }
+  console.log(errorMessage)
 }
 
 export { calculateExercise }
