@@ -31,9 +31,10 @@ app.post('/exercises', (req, res) => {
     console.log("Body:", req.body);
     const { daily_exercises, target } = req.body;
 
-    if (!daily_exercises || !target) 
+    if (!daily_exercises || !target)
         return res.status(400).json({ error: "Missing parameters." });
-    if (!Array.isArray(daily_exercises) 
+    if (!Array.isArray(daily_exercises)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         || !daily_exercises.every((n: any) => typeof n === 'number')
         || isNaN(Number(target)))
         return res.status(400).json({ error: "Malformatted parameters." });

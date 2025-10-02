@@ -17,33 +17,21 @@ export default defineConfig([
       },
     },
     plugins: {
-      // '@typescript-eslint': tseslint.plugin,
-      '@stylistic': stylistic,
+      "@stylistic": stylistic,
     },
+    ignores: ["build/*"],
     rules: {
-      // ...tseslint.configs.recommendedTypeChecked.rules,
       '@stylistic/semi': 'error',
-      'space-before-blocks': ['error', 'always'],
-      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'error',
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/restrict-template-expressions': 'off',
-      '@typescript-eslint/no-unsafe-argument': 'error',
       '@typescript-eslint/restrict-plus-operands': 'off',
       '@typescript-eslint/no-unused-vars': [
         'error',
         { 'argsIgnorePattern': '^_' }
       ],
-      'keyword-spacing': ['error', {
-        before: true,
-        after: true,
-        overrides: {
-          if: { after: true },
-          for: { after: true },
-          while: { after: true }
-        }
-      }]
     },
-  },
+  }
 ]);
