@@ -1,6 +1,8 @@
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import patientService from '../services/patientService';
-import toNewPatient from '../utils';
+import { NewPatientSchema } from '../utils';
+import { NewPatient, Patient } from '../types';
+import z from 'zod';
 
 const router = express.Router();
 
@@ -9,20 +11,32 @@ router.get('/', (_req, res) => {
   res.send(patients);
 });
 
-router.post('/', (req, res) => {
+const newPatientParses = (req: Request, _res: Response, next: NextFunction) => {
   try {
-    const newPatient = toNewPatient(req.body);
-    // const addedPatient = patientService.addPatient(newPatient);
-    patientService.addPatient(newPatient);
-    // res.json(addedPatient);
-  } catch (error: unknown) {
-    console.log("Something went wrong.");
-    let errorMessage = 'Something went wrong.';
-    if (error instanceof Error) {
-      errorMessage += ' Error: ' + error.message;
+    const result = NewPatientSchema.safeParse(req.body);
+    if(!result.success) {
+      throw result.error;
     }
-    res.status(400).send(errorMessage);
+    req.body = result.data;
+    next();
+  } catch (error: unknown) {
+    next(error);
   }
+};
+
+const errorMiddleware = (error: unknown, _req: Request, res: Response, next: NextFunction) => { 
+  if (error instanceof z.ZodError) {
+    res.status(400).send({ error: error.issues });
+  } else {
+    next(error);
+  }
+};
+
+router.post('/', newPatientParses, (req: Request<unknown, unknown, NewPatient>, res: Response<Patient>) => {
+  const addedPatient = patientService.addPatient(req.body);
+  res.json(addedPatient);
 });
+
+router.use(errorMiddleware);
 
 export default router;
