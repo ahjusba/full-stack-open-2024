@@ -41,6 +41,7 @@ const newDiaryParser = (req: Request, _res: Response, next: NextFunction) => {
 
 const errorMiddleware = (error: unknown, _req: Request, res: Response, next: NextFunction) => { 
   if (error instanceof z.ZodError) {
+    console.log("Error: ", error.issues);
     res.status(400).send({ error: error.issues });
   } else {
     next(error);

@@ -12,3 +12,28 @@
   padding: 0;
   margin: 0;
 }
+
+.diaryForm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+input, select {
+  width: 30vw;
+  height: 5vh;
+}
+
+textarea {
+  width: 30vw;
+  height: 8vh;
+}
+
+.errorMessage {
+  color: red;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: rgb(231, 231, 231);
+}

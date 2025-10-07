@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface CoursePartBase {
   name: string;
@@ -159,11 +159,13 @@ const parts: CoursePart[] = [
 ];
 
 const App = () => {
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [courseParts, setCourseParts] = useState(parts)
   const courseName = "Half Stack application development";
   const totalExercises = courseParts.reduce((sum, part) => sum + part.exerciseCount, 0);
+
+  useEffect(() => {
+    setCourseParts(parts);
+  }, [])
 
   return (
     <div>

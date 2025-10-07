@@ -4,6 +4,7 @@ export enum Weather {
   Cloudy = 'cloudy',
   Stormy = 'stormy',
   Windy = 'windy',
+  Hurricay = 'hurricany'
 };
 export enum Visibility {
   Great = 'great',
