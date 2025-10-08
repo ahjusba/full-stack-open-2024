@@ -11,10 +11,21 @@ router.get('/', (_req, res) => {
   res.send(patients);
 });
 
+router.get('/:id', (req, res) => {
+  const id = req.params.id;
+  const patients = patientService.getPatients();
+  const patient = patients.find(p => p.id === id);
+  if (patient) {
+    res.json(patient);
+  } else {
+    res.status(404).json({ message: 'Patient not found' });
+  }
+});
+
 const newPatientParses = (req: Request, _res: Response, next: NextFunction) => {
   try {
     const result = NewPatientSchema.safeParse(req.body);
-    if(!result.success) {
+    if (!result.success) {
       throw result.error;
     }
     req.body = result.data;
@@ -24,7 +35,7 @@ const newPatientParses = (req: Request, _res: Response, next: NextFunction) => {
   }
 };
 
-const errorMiddleware = (error: unknown, _req: Request, res: Response, next: NextFunction) => { 
+const errorMiddleware = (error: unknown, _req: Request, res: Response, next: NextFunction) => {
   if (error instanceof z.ZodError) {
     res.status(400).send({ error: error.issues });
   } else {

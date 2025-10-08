@@ -19,6 +19,7 @@ const getPublicPatients = (): PublicPatient[] => {
 const addPatient = (patient: NewPatient): Patient => {
   const newPatient = {
     id: uuid(),
+    entries: [], //TO DO
     ...patient
   };
 

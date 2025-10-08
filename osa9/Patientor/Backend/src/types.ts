@@ -13,15 +13,20 @@ export enum Gender {
   Other = "other"
 };
 
+export interface Entry {
+  description: string,
+}
+
 export type Patient = {
   id: string,
   name: string,
-  dateOfBirth: string,
   ssn: string,
+  occupation: string,
   gender: Gender,
-  occupation: string
+  dateOfBirth: string,
+  entries: Entry[]
 };
 
 export type NewPatient = z.infer<typeof NewPatientSchema>;
 
-export type PublicPatient = Omit<Patient, 'ssn'>;
+export type PublicPatient = Omit<Patient, 'ssn' | 'entries' >;
