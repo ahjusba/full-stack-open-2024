@@ -10,7 +10,6 @@ const PatientInfo = () => {
   useEffect(() => {
     const fetchPatient = async () => {
       const fetchedPatient = await patientService.getId(id);
-      console.log("Fetched patient: ", fetchPatient);
       setPatient(fetchedPatient);
     };
     fetchPatient();
