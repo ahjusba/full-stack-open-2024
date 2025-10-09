@@ -1,6 +1,7 @@
 import { useParams } from "react-router-dom";
-import { Entry, Patient } from "../types";
+import { Diagnosis, Entry, Patient } from "../types";
 import patientService from "../services/patients";
+import diagnosisService from "../services/diagnoses";
 import { useEffect, useState } from "react";
 
 const PatientInfo = () => {
@@ -38,14 +39,40 @@ const EntryComp = ({ entry }: { entry: Entry }) => {
   return(
     <div>
       <p>{entry.date} {entry.description}</p>
-      <ul>
-        {entry?.diagnosisCodes?.map((diagnose, index) => (
-         <li key={index}>
-          {diagnose}
-         </li> 
-        ))}
-      </ul>
+      <Diagnoses diagnosisCodes={entry.diagnosisCodes} />
     </div>
+  );
+};
+
+const Diagnoses = ({ diagnosisCodes}: { diagnosisCodes: string[] | undefined }) => {
+
+  const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
+
+  useEffect(() => {
+    const fetchDiagnoses = async () => {
+      const diagnoses = await diagnosisService.getAll();
+      setDiagnoses(diagnoses);
+    };
+
+    fetchDiagnoses();
+  }, []);
+
+  return(
+    <ul>
+      {diagnosisCodes?.map((diagnosisCode, index) => (        
+        <li key={index}>
+          <DiagnosisComp diagnosisCode={diagnosisCode} diagnoses={diagnoses} />
+        </li>
+      ))}
+    </ul>
+  );
+};
+
+const DiagnosisComp = ({diagnosisCode, diagnoses}: {diagnosisCode: string, diagnoses: Diagnosis[]}) => {
+  const diagnosis = diagnoses.find(d => d.code === diagnosisCode);
+  
+  return (
+    <p>{diagnosis?.code}: {diagnosis?.name}</p>
   );
 };
 
