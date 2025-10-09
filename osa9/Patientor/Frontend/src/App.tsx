@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { BrowserRouter as Router, Route, Link, Routes } from "react-router-dom";
 import { Button, Divider, Container, Typography } from '@mui/material';
 import PatientInfo from "./components/PatientInfo";
+import "./App.css";
 
 // import { apiBaseUrl } from "./constants";
 import { Patient } from "./types";

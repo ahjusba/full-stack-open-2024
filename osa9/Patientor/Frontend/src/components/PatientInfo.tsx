@@ -1,8 +1,8 @@
 import { useParams } from "react-router-dom";
-import { Diagnosis, Entry, Patient } from "../types";
+import { Diagnosis, Entry, Patient, HospitalEntry, OccupationalHealthcareEntry, HealthCheckEntry } from "../types";
 import patientService from "../services/patients";
 import diagnosisService from "../services/diagnoses";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 const PatientInfo = () => {
   const { id } = useParams<{ id: string }>();
@@ -29,22 +29,78 @@ const PatientInfo = () => {
       <p>{patient.ssn}</p>
       <h3>ENTRIES:</h3>
       {patient.entries.map((entry, index) => (
-        <EntryComp entry={entry} key={index} />
+        <div key={index} className="entry">
+          <EntryType entry={entry} />
+          <Diagnoses diagnosisCodes={entry?.diagnosisCodes} key={entry.id}/>
+        </div>
       ))}
     </div>
   );
 };
 
-const EntryComp = ({ entry }: { entry: Entry }) => {
+const EntryType: React.FC<{ entry: Entry }> = ({ entry }) => {
+  const assertNever = (value: never): never => {
+    throw new Error(
+      `Unhandled discriminated union member: ${JSON.stringify(value)}`
+    );
+  };
+
+  switch (entry.type) {
+    case "Hospital":
+      return <HospitalEntryComp entry={entry} />;
+    case "OccupationalHealthcare":
+      return <OccupationalHealthEntryComp entry={entry} />;
+    case "HealthCheck":
+      return <HealthCheckEntryComp entry={entry} />;
+    default:
+      assertNever(entry);
+  }
+};
+
+const BaseEntryComp = ({ entry }: { entry: Entry }) => {
   return(
     <div>
-      <p>{entry.date} {entry.description}</p>
-      <Diagnoses diagnosisCodes={entry.diagnosisCodes} />
+      <p>{entry.date}</p>
+      <p>{entry.description}</p>
+      <p>{entry.specialist}</p>
+      <p>{entry.id}</p>
+      <p>{entry.type}</p>
     </div>
   );
 };
 
-const Diagnoses = ({ diagnosisCodes}: { diagnosisCodes: string[] | undefined }) => {
+const HospitalEntryComp = ({ entry }: { entry: HospitalEntry }) => {
+  return (
+    <div>
+      <BaseEntryComp entry={entry} />
+      <p>{entry.discharge.criteria}</p>
+      <p>{entry.discharge.date}</p>
+    </div>
+  );
+};
+
+const OccupationalHealthEntryComp = ({ entry }: { entry: OccupationalHealthcareEntry }) => {
+  return (
+    <div>
+      <BaseEntryComp entry={entry} />
+      <p>{entry.employerName}</p>
+      <p>sick leave:</p>
+      <p>{entry.sickLeave?.startDate}</p>
+      <p>{entry.sickLeave?.endDate}</p>
+    </div>
+  );
+};
+
+const HealthCheckEntryComp = ({ entry }: { entry: HealthCheckEntry }) => {
+  return (
+    <div>
+      <BaseEntryComp entry={entry} />
+      <p>{entry.healthCheckRating}</p>
+    </div>
+  );
+};
+
+const Diagnoses = ({ diagnosisCodes }: { diagnosisCodes: string[] | undefined }) => {
 
   const [diagnoses, setDiagnoses] = useState<Diagnosis[]>([]);
 
@@ -57,9 +113,9 @@ const Diagnoses = ({ diagnosisCodes}: { diagnosisCodes: string[] | undefined }) 
     fetchDiagnoses();
   }, []);
 
-  return(
+  return (
     <ul>
-      {diagnosisCodes?.map((diagnosisCode, index) => (        
+      {diagnosisCodes?.map((diagnosisCode, index) => (
         <li key={index}>
           <DiagnosisComp diagnosisCode={diagnosisCode} diagnoses={diagnoses} />
         </li>
@@ -68,9 +124,9 @@ const Diagnoses = ({ diagnosisCodes}: { diagnosisCodes: string[] | undefined }) 
   );
 };
 
-const DiagnosisComp = ({diagnosisCode, diagnoses}: {diagnosisCode: string, diagnoses: Diagnosis[]}) => {
+const DiagnosisComp = ({ diagnosisCode, diagnoses }: { diagnosisCode: string, diagnoses: Diagnosis[] }) => {
   const diagnosis = diagnoses.find(d => d.code === diagnosisCode);
-  
+
   return (
     <p>{diagnosis?.code}: {diagnosis?.name}</p>
   );
