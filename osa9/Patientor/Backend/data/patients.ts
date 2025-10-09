@@ -1,4 +1,4 @@
-import { Patient, Gender } from "../src/types";
+import { Patient, Gender, Entry } from "../src/types";
 import { NewPatientSchema } from "../src/utils";
 
 const data = [
@@ -116,7 +116,7 @@ const data = [
 const patientData: Patient[] = data.map(obj => {
 	const object = NewPatientSchema.parse(obj) as Patient;
 	object.id = obj.id;
-  object.entries = obj.entries;
+  object.entries = obj.entries as Entry[]; //UNSAFE: NO VALIDATION
 	return object;
 });
 
