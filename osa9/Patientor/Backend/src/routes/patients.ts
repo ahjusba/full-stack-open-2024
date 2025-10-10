@@ -43,7 +43,7 @@ router.post('/:id/entries', newEntryParser, (req: Request<Params, unknown, NewEn
   const id = req.params.id;
   const patients = patientService.getPatients();
   const patient = patients.find(p => p.id === id);
-  if(!patient) return res.status(404);
+  if (!patient) return res.status(404);
 
   const addedEntry = patientService.addEntry(req.body, patient);
   return res.json(addedEntry);

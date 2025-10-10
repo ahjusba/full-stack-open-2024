@@ -1,8 +1,10 @@
 import { useParams } from "react-router-dom";
-import { Diagnosis, Entry, Patient, HospitalEntry, OccupationalHealthcareEntry, HealthCheckEntry } from "../types";
+import { Diagnosis, NewEntry, Entry, Patient, HospitalEntry, OccupationalHealthcareEntry, HealthCheckEntry } from "../types";
 import patientService from "../services/patients";
 import diagnosisService from "../services/diagnoses";
 import React, { useEffect, useState } from "react";
+import NewEntryComp from "./EntryForm";
+import axios from "axios";
 
 const PatientInfo = () => {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +22,35 @@ const PatientInfo = () => {
     return <p>Patient not found</p>;
   }
 
+  const postNewEntry = (entry: NewEntry) => {
+    const postEntryForPatient = async () => {
+      try {
+        const postedEntry = await patientService.createEntry(entry, patient.id);
+        console.log("Posted entry: ", postedEntry);
+        setPatient(prev => prev ? {
+          ...prev,
+          entries: [...prev.entries, postedEntry],
+        } : prev);
+
+      } catch (e: unknown) {
+        if (axios.isAxiosError(e)) {
+          if (e?.response?.data && typeof e?.response?.data === "string") {
+            const message = e.response.data.replace('Something went wrong. Error: ', '');
+            console.error(message);
+            // setError(message);
+          } else {
+            // setError("Unrecognized axios error");
+          }
+        } else {
+          console.error("Unknown error", e);
+          // setError("Unknown error");
+        }
+      }
+    };
+
+    postEntryForPatient();
+  };
+
   return (
     <div>
       <h2>{patient.name}</h2>
@@ -27,14 +58,17 @@ const PatientInfo = () => {
       <p>{patient.gender}</p>
       <p>{patient.dateOfBirth}</p>
       <p>{patient.ssn}</p>
-      <h3>ENTRIES:</h3>
-      {patient.entries.map((entry, index) => (
-        <div key={index} className="entry">
-          <EntryType entry={entry} />
-          <Diagnoses diagnosisCodes={entry?.diagnosisCodes} key={entry.id}/>
-        </div>
-      ))}
-    </div>
+      <NewEntryComp postNewEntry={postNewEntry} />
+      <h3> ENTRIES:</h3>
+      {
+        patient.entries.map((entry, index) => (
+          <div key={index} className="entry">
+            <EntryType entry={entry} />
+            <Diagnoses diagnosisCodes={entry?.diagnosisCodes} key={entry.id} />
+          </div>
+        ))
+      }
+    </div >
   );
 };
 
@@ -58,7 +92,7 @@ const EntryType: React.FC<{ entry: Entry }> = ({ entry }) => {
 };
 
 const BaseEntryComp = ({ entry }: { entry: Entry }) => {
-  return(
+  return (
     <div>
       <p>{entry.date}</p>
       <p>{entry.description}</p>
