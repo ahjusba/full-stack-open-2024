@@ -1,19 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NewEntry, HealthCheckRating } from '../types';
 
 type Props = {
   postNewEntry: (entry: NewEntry) => void;
+  entryType: string;
 };
 
-const NewEntryComp: React.FC<Props> = ({ postNewEntry }) => {
-  const [formData, setFormData] = useState<NewEntry>({
-    description: '',
-    date: '',
-    specialist: '',
-    healthCheckRating: HealthCheckRating.Healthy,
-    diagnosisCodes: [],
-    type: "HealthCheck",
-  });
+const NewEntryComp: React.FC<Props> = ({ postNewEntry, entryType }) => {
+
+  const getInitialFormData = (entryType: string): NewEntry => {
+    switch (entryType) {
+      case "HealthCheck":
+        return {
+          description: '',
+          date: '',
+          specialist: '',
+          diagnosisCodes: [],
+          healthCheckRating: HealthCheckRating.Healthy,
+          type: "HealthCheck",
+        };
+      case "Hospital":
+        return {
+          description: '',
+          date: '',
+          specialist: '',
+          diagnosisCodes: [],
+          discharge: { date: '', criteria: '' },
+          type: "Hospital",
+        };
+      case "OccupationalHealthcare":
+        return {
+          description: '',
+          date: '',
+          specialist: '',
+          diagnosisCodes: [],
+          employerName: '',
+          sickLeave: { startDate: '', endDate: '' },
+          type: "OccupationalHealthcare",
+        };
+      default:
+        throw new Error("Unsupported entry type");
+    }
+  };
+
+  useEffect(() => {
+    setFormData(getInitialFormData(entryType));
+  }, [entryType]);
+
+  const [formData, setFormData] = useState<NewEntry>(getInitialFormData(entryType));
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -29,10 +63,40 @@ const NewEntryComp: React.FC<Props> = ({ postNewEntry }) => {
       value = Number(rawValue) as HealthCheckRating;
     }
 
-    setFormData(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+    if (name.includes(".")) {
+      const [parentKey, childKey] = name.split(".");
+
+      setFormData(prev => {
+        if (prev.type === "Hospital" && parentKey === "discharge") {
+          return {
+            ...prev,
+            discharge: {
+              ...prev.discharge,
+              [childKey]: value,
+            },
+          };
+        }
+
+        if (prev.type === "OccupationalHealthcare" && parentKey === "sickLeave") {
+          return {
+            ...prev,
+            sickLeave: {
+              ...prev.sickLeave,
+              [childKey]: value,
+            },
+          };
+        }
+
+        return prev; // fallback if no match
+      });
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
+
+    console.log(formData);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -71,22 +135,6 @@ const NewEntryComp: React.FC<Props> = ({ postNewEntry }) => {
           />
         </div>
         <div>
-          <label>HealthCheck Rating:</label>
-          <select
-            name="healthCheckRating"
-
-            onChange={handleChange}
-          >
-            {Object.entries(HealthCheckRating)
-              .filter(([_key, val]) => typeof val === "number")
-              .map(([key, val]) => (
-                <option key={val} value={val}>
-                  {key}
-                </option>
-              ))}
-          </select>
-        </div>
-        <div>
           <label>Diagnosis Codes (comma-separated):</label>
           <input
             name="diagnosisCodes"
@@ -94,6 +142,46 @@ const NewEntryComp: React.FC<Props> = ({ postNewEntry }) => {
             onChange={handleChange}
           />
         </div>
+
+        {entryType === "HealthCheck" && (
+          <div>
+            <label>HealthCheck Rating:</label>
+            <select
+              name="healthCheckRating"
+
+              onChange={handleChange}
+            >
+              {Object.entries(HealthCheckRating)
+                .filter(([_key, val]) => typeof val === "number")
+                .map(([key, val]) => (
+                  <option key={val} value={val}>
+                    {key}
+                  </option>
+                ))}
+            </select>
+          </div>
+        )}
+
+        {entryType === "Hospital" && (
+          <div>
+            <label>Discharge Date:</label>
+            <input name="discharge.date" type="date" onChange={handleChange} />
+            <label>Discharge Criteria:</label>
+            <input name="discharge.criteria" onChange={handleChange} />
+          </div>
+        )}
+
+        {entryType === "OccupationalHealthcare" && (
+          <div>
+            <label>Employer Name:</label>
+            <input name="employerName" onChange={handleChange} />
+            <label>Sick Leave Start:</label>
+            <input name="sickLeave.startDate" type="date" onChange={handleChange} />
+            <label>Sick Leave End:</label>
+            <input name="sickLeave.endDate" type="date" onChange={handleChange} />
+          </div>
+        )}
+
         <button type="submit">Add</button>
       </form>
     </div>

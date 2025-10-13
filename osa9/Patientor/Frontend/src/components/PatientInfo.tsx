@@ -10,7 +10,7 @@ const PatientInfo = () => {
   const { id } = useParams<{ id: string }>();
   const [patient, setPatient] = useState<Patient>();
   const [errorMessage, setError] = useState('');
-
+  const [entryType, setEntryType] = useState('HealthCheck');
   useEffect(() => {
     const fetchPatient = async () => {
       const fetchedPatient = await patientService.getId(id);
@@ -26,6 +26,7 @@ const PatientInfo = () => {
   const postNewEntry = (entry: NewEntry) => {
     const postEntryForPatient = async () => {
       try {
+        console.log("Entry: ", entry);
         const postedEntry = await patientService.createEntry(entry, patient.id);
         console.log("Posted entry: ", postedEntry);
         setPatient(prev => prev ? {
@@ -72,8 +73,8 @@ const PatientInfo = () => {
       {errorMessage && (
         <ErrorMessage message={errorMessage} setError={setError} />
       )}
-
-      <NewEntryComp postNewEntry={postNewEntry} />
+      <EntryTypeSelector entryType={entryType} setEntryType={setEntryType} />
+      <NewEntryComp postNewEntry={postNewEntry} entryType={entryType} />
       <h3> ENTRIES:</h3>
       {
         patient.entries.map((entry, index) => (
@@ -86,6 +87,40 @@ const PatientInfo = () => {
     </div >
   );
 };
+const EntryTypeSelector: React.FC<{ entryType: string; setEntryType: (type: string) => void }> = ({ entryType, setEntryType }) => (
+  <div>
+    <label>
+      <input
+        type="radio"
+        name="entryType"
+        value="HealthCheck"
+        checked={entryType === "HealthCheck"}
+        onChange={() => setEntryType("HealthCheck")}
+      />
+      HealthCheck
+    </label>
+    <label>
+      <input
+        type="radio"
+        name="entryType"
+        value="OccupationalHealthcare"
+        checked={entryType === "OccupationalHealthcare"}
+        onChange={() => setEntryType("OccupationalHealthcare")}
+      />
+      OccupationalHealthcare
+    </label>
+    <label>
+      <input
+        type="radio"
+        name="entryType"
+        value="Hospital"
+        checked={entryType === "Hospital"}
+        onChange={() => setEntryType("Hospital")}
+      />
+      Hospital
+    </label>
+  </div>
+);
 
 const ErrorMessage = ({ message, setError }: { message: string, setError: (value: string) => void }) => {
   setTimeout(() => {
