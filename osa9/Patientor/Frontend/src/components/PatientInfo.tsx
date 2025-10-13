@@ -9,6 +9,7 @@ import axios from "axios";
 const PatientInfo = () => {
   const { id } = useParams<{ id: string }>();
   const [patient, setPatient] = useState<Patient>();
+  const [errorMessage, setError] = useState('');
 
   useEffect(() => {
     const fetchPatient = async () => {
@@ -32,18 +33,27 @@ const PatientInfo = () => {
           entries: [...prev.entries, postedEntry],
         } : prev);
 
-      } catch (e: unknown) {
-        if (axios.isAxiosError(e)) {
-          if (e?.response?.data && typeof e?.response?.data === "string") {
-            const message = e.response.data.replace('Something went wrong. Error: ', '');
-            console.error(message);
-            // setError(message);
+      } catch (error: unknown) { //TODO: axios error handling in one location
+        if (axios.isAxiosError(error)) {
+          const responseData = error.response?.data;
+          if (typeof responseData === "string") {
+            setError(responseData);
+          } else if (
+            responseData &&
+            typeof responseData === "object" &&
+            Array.isArray(responseData.error)
+          ) {
+            const firstError = responseData.error[0];
+            if (firstError?.message) {
+              setError(firstError.message);
+            } else {
+              setError("Unknown structured error format");
+            }
           } else {
-            // setError("Unrecognized axios error");
+            setError("Unrecognized axios error");
           }
         } else {
-          console.error("Unknown error", e);
-          // setError("Unknown error");
+          setError("Unknown error");
         }
       }
     };
@@ -58,6 +68,11 @@ const PatientInfo = () => {
       <p>{patient.gender}</p>
       <p>{patient.dateOfBirth}</p>
       <p>{patient.ssn}</p>
+
+      {errorMessage && (
+        <ErrorMessage message={errorMessage} setError={setError} />
+      )}
+
       <NewEntryComp postNewEntry={postNewEntry} />
       <h3> ENTRIES:</h3>
       {
@@ -70,6 +85,13 @@ const PatientInfo = () => {
       }
     </div >
   );
+};
+
+const ErrorMessage = ({ message, setError }: { message: string, setError: (value: string) => void }) => {
+  setTimeout(() => {
+    setError('');
+  }, 2000);
+  return <h1 className="errorMessage">{message}</h1>;
 };
 
 const EntryType: React.FC<{ entry: Entry }> = ({ entry }) => {

@@ -32,7 +32,8 @@ export enum HealthCheckRating {
   "Healthy" = 0,
   "LowRisk" = 1,
   "HighRisk" = 2,
-  "CriticalRisk" = 3
+  "CriticalRisk" = 3,
+  "DoesntExist" = 4
 }
 
 export interface SickLeave {
