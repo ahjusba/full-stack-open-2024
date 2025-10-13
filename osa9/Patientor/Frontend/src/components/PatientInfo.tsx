@@ -3,7 +3,7 @@ import { Diagnosis, NewEntry, Entry, Patient, HospitalEntry, OccupationalHealthc
 import patientService from "../services/patients";
 import diagnosisService from "../services/diagnoses";
 import React, { useEffect, useState } from "react";
-import NewEntryComp from "./EntryForm";
+import NewEntryComp from "./EntryFields/EntryForm";
 import axios from "axios";
 
 const PatientInfo = () => {
