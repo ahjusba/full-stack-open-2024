@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NewEntry, HealthCheckRating } from '../types';
+import { codes } from '../constants';
+import { FormControl, InputLabel, MenuItem, OutlinedInput, Select, SelectChangeEvent } from '@mui/material';
 
 type Props = {
   postNewEntry: (entry: NewEntry) => void;
@@ -7,6 +9,8 @@ type Props = {
 };
 
 const NewEntryComp: React.FC<Props> = ({ postNewEntry, entryType }) => {
+
+  const [diagnosisCodes, setCodes] = useState<string[]>([]);
 
   const getInitialFormData = (entryType: string): NewEntry => {
     switch (entryType) {
@@ -47,12 +51,28 @@ const NewEntryComp: React.FC<Props> = ({ postNewEntry, entryType }) => {
     setFormData(getInitialFormData(entryType));
   }, [entryType]);
 
+  useEffect(() => {
+    setFormData(prev => {
+      return {
+        ...prev,
+        diagnosisCodes: diagnosisCodes,
+      };
+    });
+  }, [diagnosisCodes]);
+
   const [formData, setFormData] = useState<NewEntry>(getInitialFormData(entryType));
 
+  const handleSelectChange = (event: SelectChangeEvent<typeof diagnosisCodes>) => {
+    const { value } = event.target;
+    setCodes(
+      typeof value === 'string' ? value.split(',') : value,
+    );    
+  };
+
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    const { name, value: rawValue } = e.target;
+    const { name, value: rawValue } = event.target;
     let value: string | string[] | HealthCheckRating = rawValue;
 
     if (name === "diagnosisCodes") {
@@ -135,12 +155,27 @@ const NewEntryComp: React.FC<Props> = ({ postNewEntry, entryType }) => {
           />
         </div>
         <div>
-          <label>Diagnosis Codes (comma-separated):</label>
-          <input
-            name="diagnosisCodes"
-            value={(formData.diagnosisCodes ?? []).join(",")}
-            onChange={handleChange}
-          />
+          <FormControl sx={{ m: 1, width: 300 }}>
+            <InputLabel id="demo-multiple-name-label">Diagnoses</InputLabel>
+            <Select
+              labelId="demo-multiple-name-label"
+              id="demo-multiple-name"
+              multiple
+              value={diagnosisCodes}
+              onChange={handleSelectChange}
+              input={<OutlinedInput label="Diagnoses" />}
+              MenuProps={MenuProps}
+            >
+              {codes.map((code: string) => (
+                <MenuItem
+                  key={code}
+                  value={code}
+                >
+                  {code}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </div>
 
         {entryType === "HealthCheck" && (
@@ -186,6 +221,18 @@ const NewEntryComp: React.FC<Props> = ({ postNewEntry, entryType }) => {
       </form>
     </div>
   );
+};
+
+const ITEM_HEIGHT = 48;
+const ITEM_PADDING_TOP = 8;
+
+const MenuProps = {
+  PaperProps: {
+    style: {
+      maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+      width: 250,
+    },
+  },
 };
 
 export default NewEntryComp;
